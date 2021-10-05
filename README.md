@@ -12,7 +12,7 @@
 
 # :rocket: magento-quote-v1
 
-Plugin de Push no Magento v1.
+Plugin de Cotação no Magento v1.
 
 ## Squad
 Conectividade
