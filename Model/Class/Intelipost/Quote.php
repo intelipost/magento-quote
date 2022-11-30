@@ -24,7 +24,7 @@ public function requestQuote($requestData, $cached = true, $requote = false)
     {
         $this->methods = $this->api->apiResponseToObject();
         $this->idCotacao = $this->methods->content->id;
-        $this->quoteSuccess = true;
+            $this->quoteSuccess = true;
 
         if ($requote)
         {
@@ -108,6 +108,7 @@ public function getMethods($freeShipping)
     $greater_delivery_id = 0;
     $freeShippingOnlyFallback = Mage::helper('quote')->getConfigData('free_shipping_fallback');
 
+    $child_description = '';
     foreach ($methodsToAdd as $id => $child)
     {
         if ($child->delivery_method_id == $free_shipping_method && $freeShipping && !$freeShippingOnlyFallback)
@@ -127,6 +128,8 @@ public function getMethods($freeShipping)
                 {
                     $lower_price = $final_shipping_cost;
                     $lower_price_id = $id;
+                    $child_description = $child->description;
+
                 }
             }
             else if (!strcmp ($free_shipping_method, 'lower-cost'))
@@ -136,6 +139,7 @@ public function getMethods($freeShipping)
                 {
                     $lower_cost = $provider_shipping_cost;
                     $lower_cost_id = $id;
+                    $child_description = $child->description;
                 }
             }
             else if (!strcmp ($free_shipping_method, 'greater_delivery_date'))
@@ -145,6 +149,7 @@ public function getMethods($freeShipping)
                 {
                     $greater_delivery = $delivery_estimate_business_days;
                     $greater_delivery_id = $id;
+                    $child_description = $child->description;
                 }
             }
             else if (!strcmp ($free_shipping_method, 'lower_delivery_date'))
@@ -154,6 +159,7 @@ public function getMethods($freeShipping)
                 {
                     $lower_delivery = $delivery_estimate_business_days;
                     $lower_delivery_id = $id;
+                    $child_description = $child->description;
                 }
             }
             else
@@ -170,7 +176,7 @@ public function getMethods($freeShipping)
 
     if ($freeShipping && ($lower_price_id || $lower_delivery_id || $lower_cost || $greater_delivery) && !$freeShippingOnlyFallback)
     {
-        $methodId = $lower_price_id > 0 ? $lower_price_id : $lower_cost;
+        $methodId = $lower_price_id > 0 ? $lower_price_id : $lower_cost_id;
         if ($methodId == 0)
         {
             $methodId = $lower_delivery_id > 0 ? $lower_delivery_id : $greater_delivery_id;
@@ -178,7 +184,7 @@ public function getMethods($freeShipping)
 
         $object = $methodsToAdd [$methodId];
         $object->final_shipping_cost = 0;
-        $object->description = Mage::helper('quote')->getConfigData('free_shipping_text') != "" ? Mage::helper('quote')->getConfigData('free_shipping_text') : $child->description;
+        $object->description = Mage::helper('quote')->getConfigData('free_shipping_text') != "" ? Mage::helper('quote')->getConfigData('free_shipping_text') : $child_description;
     }
 
     if (count($methodsToAdd) == 1 && Mage::helper('quote')->getConfigData('copy_single_method'))
